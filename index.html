@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feliz Día de las Flores Amarillas 🌻✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #030108;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            color: #fff;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Encabezado Principal */
+        .header-title {
+            position: absolute;
+            top: 25px;
+            width: 100%;
+            text-align: center;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            color: #ffe875;
+            text-shadow: 0 0 15px rgba(255, 215, 0, 0.9), 0 0 30px rgba(255, 215, 0, 0.5);
+            letter-spacing: 1.5px;
+            font-weight: 700;
+        }
+
+        /* Tarjeta emergente (Modal) */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.85);
+            background: linear-gradient(145deg, #fff9e6 0%, #ffe380 100%);
+            color: #2b2300;
+            padding: 2.2rem 1.8rem;
+            border-radius: 24px;
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.6), 0 15px 35px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+            width: 88%;
+            max-width: 420px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid #ffd700;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal h2 {
+            color: #a66a00;
+            font-size: 1.6rem;
+            margin-bottom: 0.8rem;
+            font-weight: 700;
+        }
+
+        .modal p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #4a3e00;
+            margin-bottom: 1.6rem;
+        }
+
+        .modal button {
+            background: linear-gradient(45deg, #e69d00, #ffd700);
+            color: #211600;
+            border: none;
+            padding: 0.75rem 2.2rem;
+            font-size: 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 14px rgba(212, 136, 6, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .modal button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 18px rgba(212, 136, 6, 0.6);
+        }
+
+        .hint {
+            position: absolute;
+            bottom: 22px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 240, 180, 0.85);
+            font-size: 0.95rem;
+            z-index: 2;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        @media (max-width: 600px) {
+            .header-title h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-title">
+        <h1>Feliz Día de las Flores Amarillas 🌻</h1>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="hint">Toca cualquier punto del centro o de las flores ✨</div>
+
+    <div class="modal-overlay" id="overlay" onclick="closeModal()"></div>
+
+    <div class="modal" id="cardModal">
+        <h2 id="modalTitle">Para Ti 💛</h2>
+        <p id="modalText">Estas flores amarillas son como tu luz: brillantes, radiantes y llenas de energía. Gracias por iluminar todo a tu alrededor. Eres una mujer increíble, te mereces todo en la vida y que nadie nunca apague tu brillo.</p>
+        <button onclick="closeModal()">Cerrar ✨</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Frases generales e inspiradoras
+        const itemsData = [
+            { 
+                title: "Eres luz ☀️", 
+                text: "Donde vas, dejas una huella bonita. Tu energía ilumina cualquier lugar y contagia buena vibra." 
+            },
+            { 
+                title: "Increíble mujer 💛", 
+                text: "Nunca dudes de la fuerza que tienes ni de lo lejos que puedes llegar. Te mereces todo lo bueno de la vida." 
+            },
+            { 
+                title: "Brilla siempre ✨", 
+                text: "Que nada ni nadie apague nunca tu esencia ni la alegría que transmites día a día." 
+            },
+            { 
+                title: "Mereces lo mejor 🌻", 
+                text: "Te mereces momentos felices, paz, sueños cumplidos y personas que valoren todo lo que eres." 
+            },
+            { 
+                title: "Unica y radiante 🌼", 
+                text: "Estas flores amarillas representan la calidez, la resiliencia y la belleza de tu camino." 
+            },
+            { 
+                title: "Pura magia 💫", 
+                text: "Sigue caminando con la cabeza en alto y sonriendo, porque el mundo necesita más personas con tu luz." 
+            }
+        ];
+
+        // Partículas galácticas del fondo
+        const particles = [];
+        const numParticles = 260;
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: (Math.random() - 0.5) * 1600,
+                y: (Math.random() - 0.5) * 1600,
+                z: Math.random() * 1000,
+                size: Math.random() * 2 + 0.8,
+                color: `rgba(${230 + Math.random()*25}, ${190 + Math.random()*50}, ${50 + Math.random()*100}, ${0.4 + Math.random()*0.5})`
+            });
+        }
+
+        // Elementos que orbitan
+        const items = [];
+        const numItems = itemsData.length;
+        
+        for (let i = 0; i < numItems; i++) {
+            const angle = (i / numItems) * Math.PI * 2;
+            items.push({
+                angle: angle,
+                title: itemsData[i].title,
+                text: itemsData[i].text
+            });
+        }
+
+        let globalAngle = 0;
+
+        // Corazón en el centro
+        function drawHeart(cx, cy, scale) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+            ctx.beginPath();
+            
+            for (let t = 0; t <= Math.PI * 2; t += 0.02) {
+                let x = 16 * Math.pow(Math.sin(t), 3);
+                let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                if (t === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+
+            ctx.strokeStyle = '#ffe066';
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 28;
+            ctx.shadowColor = '#ffd700';
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.22)';
+            ctx.fill();
+
+            // Texto "Para Ti" en el centro del corazón
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 8px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = '#ffd700';
+            ctx.fillText('Para Ti', 0, 0);
+
+            ctx.restore();
+        }
+
+        // Bucle principal de animación
+        function render() {
+            ctx.clearRect(0, 0, width, height);
+            const cx = width / 2;
+            const cy = height / 2;
+
+            const radiusX = Math.min(width * 0.38, 310);
+            const radiusY = Math.min(height * 0.18, 135);
+
+            globalAngle += 0.0032;
+
+            // 1. Resplandor galáctico de fondo
+            let bgGlow = ctx.createRadialGradient(cx, cy, 10, cx, cy, 390);
+            bgGlow.addColorStop(0, 'rgba(255, 215, 0, 0.18)');
+            bgGlow.addColorStop(0.5, 'rgba(120, 80, 0, 0.05)');
+            bgGlow.addColorStop(1, 'rgba(3, 1, 8, 0)');
+            ctx.fillStyle = bgGlow;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 390, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. Dibujar estrellas / partículas de polvo
+            particles.forEach(p => {
+                p.z -= 0.6;
+                if (p.z <= 0) p.z = 1000;
+
+                let k = 300 / p.z;
+                let px = p.x * k + cx;
+                let py = p.y * k + cy;
+
+                if (px >= 0 && px <= width && py >= 0 && py <= height) {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.size * k * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // 3. Corazón central animado
+            const heartPulse = 1.9 + Math.sin(Date.now() * 0.003) * 0.15;
+            drawHeart(cx, cy, heartPulse);
+
+            // 4. Flores y frases en la órbita
+            items.forEach((item) => {
+                let currentAngle = item.angle + globalAngle;
+                let x = cx + Math.cos(currentAngle) * radiusX;
+                let y = cy + Math.sin(currentAngle) * radiusY;
+
+                let depth = (Math.sin(currentAngle) + 1) / 2;
+                let scale = 0.75 + depth * 0.45;
+                let opacity = 0.55 + depth * 0.45;
+
+                item.currentX = x;
+                item.currentY = y;
+                item.currentRadius = 38 * scale;
+
+                ctx.save();
+                ctx.globalAlpha = opacity;
+
+                ctx.shadowBlur = 12 * scale;
+                ctx.shadowColor = '#ffd700';
+
+                ctx.fillStyle = 'rgba(18, 12, 4, 0.78)';
+                ctx.strokeStyle = '#ffe066';
+                ctx.lineWidth = 1.5 * scale;
+
+                const boxWidth = 125 * scale;
+                const boxHeight = 38 * scale;
+
+                ctx.beginPath();
+                ctx.roundRect(x - boxWidth / 2, y - boxHeight / 2, boxWidth, boxHeight, 19 * scale);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.font = `${18 * scale}px Arial`;
+                ctx.textAlign = 'left';
+                ctx.fillText('🌻', x - (boxWidth / 2) + (10 * scale), y + (6 * scale));
+
+                ctx.fillStyle = '#fff4bd';
+                ctx.font = `bold ${11 * scale}px sans-serif`;
+                ctx.textAlign = 'left';
+                ctx.fillText(item.title, x - (boxWidth / 2) + (34 * scale), y + (4 * scale));
+
+                ctx.restore();
+            });
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+
+        // Detectar interacción
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            // Verificar si hizo clic en el corazón del centro
+            const cx = width / 2;
+            const cy = height / 2;
+            if (Math.hypot(clickX - cx, clickY - cy) < 65) {
+                openModal(
+                    "Para Ti 💛", 
+                    "Estas flores amarillas son como tu luz: brillantes, radiantes y llenas de energía. Gracias por iluminar todo a tu alrededor. Eres una mujer increíble, te mereces todo en la vida y que nadie nunca apague tu brillo."
+                );
+                return;
+            }
+
+            // Verificar si hizo clic en las flores de la órbita
+            items.forEach(item => {
+                let dist = Math.hypot(clickX - item.currentX, clickY - item.currentY);
+                if (dist < item.currentRadius) {
+                    openModal(item.title, item.text);
+                }
+            });
+        });
+
+        function openModal(title, text) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('cardModal').classList.add('active');
+            document.getElementById('overlay').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('cardModal').classList.remove('active');
+            document.getElementById('overlay').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
