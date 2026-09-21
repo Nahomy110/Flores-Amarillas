@@ -12,20 +12,20 @@ container.appendChild(renderer.domElement);
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxDistance = 20;
-controls.minDistance = 3;
+controls.maxDistance = 25;
+controls.minDistance = 2;
 
 camera.position.set(0, 6, 12);
 controls.update();
 
-// --- GALAXIA DE PARTÍCULAS DORADAS ---
-const particleCount = 8000;
+// --- GALAXIA DE PARTÍCULAS DORADAS (Espiral 3D) ---
+const particleCount = 9000;
 const geometry = new THREE.BufferGeometry();
 const positions = new Float32Array(particleCount * 3);
 const colors = new Float32Array(particleCount * 3);
 
 for (let i = 0; i < particleCount; i++) {
-  const radius = Math.random() * 8 + 0.5;
+  const radius = Math.random() * 8.5 + 0.5;
   const spinAngle = radius * 3.5;
   const branchAngle = ((i % 4) * 2 * Math.PI) / 4;
 
@@ -41,7 +41,6 @@ for (let i = 0; i < particleCount; i++) {
   positions[i * 3 + 1] = y;
   positions[i * 3 + 2] = z;
 
-  // Colores en tonos amarillos y dorados brillantes
   colors[i * 3] = 1.0;
   colors[i * 3 + 1] = 0.85 + Math.random() * 0.15;
   colors[i * 3 + 2] = 0.1;
@@ -70,7 +69,6 @@ for (let i = 0; i < heartParticleCount; i++) {
   const t = Math.PI * (Math.random() * 2 - 1);
   const u = Math.PI * (Math.random() - 0.5);
 
-  // Ecuación paramétrica de corazón 3D
   const x = 16 * Math.pow(Math.sin(t), 3);
   const y = 13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t);
   const z = u * 4;
@@ -93,21 +91,26 @@ heartGroup.add(heartParticles);
 heartGroup.position.set(0, 2.5, 0);
 scene.add(heartGroup);
 
-// --- MENSAJES Y TEXTOS FLOTANTES ---
+// --- LISTA AMPLIADA DE MINI FRASES FLOTANTES ---
 const messages = [
-  "Te Amo", "Eres mi sol", "Eres preciosa", 
-  "Mi Amor", "Me encantas", "Amor de mi vida", 
-  "Siempre juntos", "Eres única", "Eres mi todo"
+  "Te Adoro 🌻", "Eres mi sol ☀️", "Eres preciosa ✨", 
+  "Mi solecito 💛", "Eres preciosa", "Siempre fabulosa ❤️", 
+  "Siempre juntos 💫", "Eres única 🌟", "Eres mi todo 💖",
+  "Contigo, las risas no faltan", "Tienes un lindo corazon", "Luz de mis días 🌞",
+  "Gracias por estar aquí", "Yo soy tu amigo fiel jaja", "Tu sonrisa brilla 🌼",
+  "Compañera de vida", "Mi persona favorita 🌻", "Nunca dejes de brillar ✨"
 ];
 
 const labelsHTML = [];
 
+// Distribución tridimensional alrededor de la galaxia
 messages.forEach((text, idx) => {
   const angle = (idx / messages.length) * Math.PI * 2;
-  const dist = 3.5 + Math.random() * 2;
+  // Distancias y alturas variadas para repartir las frases en 360°
+  const dist = 3.0 + Math.random() * 4.5;
   const x = Math.cos(angle) * dist;
   const z = Math.sin(angle) * dist;
-  const y = Math.random() * 1.5;
+  const y = (Math.random() - 0.3) * 3.5;
 
   const div = document.createElement('div');
   div.className = 'label-3d';
@@ -120,6 +123,7 @@ messages.forEach((text, idx) => {
   });
 });
 
+// Proyección dinámica de 3D a 2D según la cámara
 function updateLabels() {
   const tempV = new THREE.Vector3();
   labelsHTML.forEach(item => {
@@ -132,7 +136,7 @@ function updateLabels() {
     item.element.style.left = `${x}px`;
     item.element.style.top = `${y}px`;
 
-    // Ocultar si está detrás de la cámara
+    // Ocultar si la etiqueta queda detrás del plano de la cámara
     if (tempV.z > 1) {
       item.element.style.display = 'none';
     } else {
@@ -141,13 +145,13 @@ function updateLabels() {
   });
 }
 
-// --- BUCLE DE ANIMACIÓN ---
+// --- BUCLE DE ANIMACIÓN Y ROTACIÓN ---
 function animate() {
   requestAnimationFrame(animate);
 
-  // Rotación suave de la galaxia y del corazón
-  galaxy.rotation.y += 0.002;
-  heartGroup.rotation.y += 0.008;
+  // Rotación constante de la galaxia y del corazón
+  galaxy.rotation.y += 0.0018;
+  heartGroup.rotation.y += 0.006;
 
   controls.update();
   updateLabels();
@@ -156,6 +160,7 @@ function animate() {
 }
 animate();
 
+// --- CONTROL DEL MODAL Y CARTA ---
 const modal = document.getElementById('cardModal');
 const closeBtn = document.getElementById('closeBtn');
 
@@ -166,7 +171,7 @@ closeBtn.addEventListener('click', () => {
   }, 500);
 });
 
-// Redimensionamiento de ventana
+// Ajuste automático ante cambios de tamaño de pantalla
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
