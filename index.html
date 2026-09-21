@@ -3,39 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flores Amarillas ✨</title>
+  <title>Galaxia de Flores Amarillas 🌻✨</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
-  <div class="night"></div>
+  <div id="canvas-container"></div>
 
-  <!-- Contenedor de la flor -->
-  <div class="flower-container" id="flowerContainer">
-    <div class="flower">
-      <div class="center" id="flowerCenter"></div>
-      <!-- Pétalos -->
-      <div class="petal p1"></div>
-      <div class="petal p2"></div>
-      <div class="petal p3"></div>
-      <div class="petal p4"></div>
-      <div class="petal p5"></div>
-      <div class="petal p6"></div>
-      <div class="petal p7"></div>
-      <div class="petal p8"></div>
+  <div class="modal" id="cardModal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeBtn">&times;</span>
+      <div class="card-header">
+        <h2>Mi amor</h2>
+      </div>
+      <div class="card-body">
+        <p>Estas flores amarillas son como tú: brillantes, radiantes y llenas de alegría.</p>
+        <p>Gracias por iluminar cada uno de mis días. Eres simplemente hermosa.</p>
+        <p class="signature">Te Amo Mucho ✨</p>
+      </div>
+      <button class="btn-para-ti" id="openCardBtn">Para Ti 💛</button>
     </div>
-    <div class="stem"></div>
-    <div class="leaf leaf-left"></div>
-    <div class="leaf leaf-right"></div>
   </div>
-
-  <!-- Cartel / Mensaje interactivo -->
-  <div class="card">
-    <h1 id="title">Haz clic en la flor 🌻</h1>
-    <p id="message">¡Tienes un detalle especial esperándote!</p>
-  </div>
-
-  <!-- Contenedor para lluvia de pétalos/estrellas -->
-  <div id="particles"></div>
 
   <script src="script.js"></script>
 </body>
