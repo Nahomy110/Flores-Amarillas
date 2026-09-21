@@ -21,6 +21,24 @@ body, html {
   z-index: 1;
 }
 
+/* FRASES FLOTANTES 3D (Corregido) */
+.label-3d {
+  position: absolute;
+  z-index: 10; /* Asegura que estén por encima del canvas */
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: bold;
+  text-shadow: 
+    0 0 8px rgba(255, 230, 0, 1), 
+    0 0 15px rgba(255, 215, 0, 0.9),
+    0 0 25px rgba(255, 180, 0, 0.8);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* Modal / Carta interactiva con animación */
 .modal {
   display: flex;
   position: fixed;
@@ -102,16 +120,4 @@ body, html {
 
 .btn-para-ti:hover {
   transform: scale(1.05);
-}
-
-/* Textos flotantes en la escena 3D */
-.label-3d {
-  position: absolute;
-  color: #ffffff;
-  font-size: 0.9rem;
-  font-weight: bold;
-  text-shadow: 0 0 8px rgba(255, 230, 0, 0.9), 0 0 15px rgba(255, 215, 0, 0.8);
-  pointer-events: none;
-  transform: translate(-50%, -50%);
-  white-space: nowrap;
 }
