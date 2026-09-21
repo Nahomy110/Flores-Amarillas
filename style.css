@@ -28,16 +28,19 @@ html, body {
   position: absolute;
   z-index: 10;
   color: #ffffff;
-  font-size: 0.85rem;
-  font-weight: bold;
+  /* El tamaño se adapta dinámicamente: mínimo 14px, recomendado 3.8vw, máximo 20px */
+  font-size: clamp(14px, 3.8vw, 20px);
+  font-weight: 800;
   text-shadow: 
-    0 0 6px rgba(255, 230, 0, 1), 
-    0 0 12px rgba(255, 215, 0, 0.9);
+    0 0 8px rgba(255, 230, 0, 1), 
+    0 0 16px rgba(255, 215, 0, 0.9),
+    0 0 24px rgba(255, 180, 0, 0.7);
   pointer-events: none;
   transform: translate(-50%, -50%);
   white-space: nowrap;
   user-select: none;
   transition: opacity 0.3s ease;
+  letter-spacing: 0.5px;
 }
 
 /* Modal / Carta interactiva */
@@ -108,6 +111,9 @@ html, body {
 /* Estilos específicos para telefonos */
 @media (max-width: 600px) {
   .label-3d {
-    font-size: 0.75rem;
+    font-size: clamp(13px, 4.2vw, 17px); 
+    text-shadow: 
+      0 0 6px rgba(255, 230, 0, 1), 
+      0 0 12px rgba(255, 200, 0, 1);
   }
 }
