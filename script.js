@@ -5,20 +5,29 @@ const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Optimizado para pantallas Retina/Celulares
 container.appendChild(renderer.domElement);
 
-// Controles de cámara orbital para rotar la galaxia manualmente
+// Controles orbitales (compatibles con gestos táctiles)
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxDistance = 25;
-controls.minDistance = 2;
+controls.maxDistance = 30;
+controls.minDistance = 3;
 
-camera.position.set(0, 6, 12);
-controls.update();
+// Ajuste inicial de distancia de cámara si es pantalla vertical (móvil)
+function adjustCameraForDevice() {
+  const isMobile = window.innerWidth < 600;
+  if (isMobile) {
+    camera.position.set(0, 7, 16); // Alejamos la cámara en celular para abarcar toda la escena
+  } else {
+    camera.position.set(0, 5, 11);
+  }
+  controls.update();
+}
+adjustCameraForDevice();
 
-// --- GALAXIA DE PARTÍCULAS DORADAS (Espiral 3D) ---
+// --- GALAXIA DE PARTÍCULAS DORADAS ---
 const particleCount = 9000;
 const geometry = new THREE.BufferGeometry();
 const positions = new Float32Array(particleCount * 3);
@@ -50,7 +59,7 @@ geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
 const particleMaterial = new THREE.PointsMaterial({
-  size: 0.05,
+  size: window.innerWidth < 600 ? 0.06 : 0.05, // Partículas ligeramente más visibles en móvil
   vertexColors: true,
   transparent: true,
   opacity: 0.9
@@ -59,7 +68,7 @@ const particleMaterial = new THREE.PointsMaterial({
 const galaxy = new THREE.Points(geometry, particleMaterial);
 scene.add(galaxy);
 
-// --- CORAZÓN BRILLANTE DE PARTÍCULAS EN EL CENTRO ---
+// --- CORAZÓN EN EL CENTRO ---
 const heartGroup = new THREE.Group();
 const heartParticleCount = 1200;
 const heartGeo = new THREE.BufferGeometry();
@@ -88,29 +97,27 @@ const heartMat = new THREE.PointsMaterial({
 
 const heartParticles = new THREE.Points(heartGeo, heartMat);
 heartGroup.add(heartParticles);
-heartGroup.position.set(0, 2.5, 0);
+heartGroup.position.set(0, 2.2, 0);
 scene.add(heartGroup);
 
-// --- LISTA AMPLIADA DE MINI FRASES FLOTANTES ---
+// --- FRASES FLOTANTES 3D ---
 const messages = [
-  "Te Adoro 🌻", "Eres mi sol ☀️", "Eres preciosa ✨", 
-  "Mi solecito 💛", "Eres preciosa", "Siempre fabulosa ❤️", 
-  "Siempre juntos 💫", "Eres única 🌟", "Eres mi todo 💖",
-  "Contigo, las risas no faltan", "Tienes un lindo corazon", "Luz de mis días 🌞",
-  "Gracias por estar aquí", "Yo soy tu amigo fiel jaja", "Tu sonrisa brilla 🌼",
-  "Compañera de vida", "Mi persona favorita 🌻", "Nunca dejes de brillar ✨"
+  "Te Adoro 🌻", "Eres mi sol ☀️", "Eres preciosa ✨", 
+  "Mi solecito 💛", "Eres preciosa", "Siempre fabulosa ❤️", 
+  "Siempre juntos 💫", "Eres única 🌟", "Eres mi todo 💖",
+  "Contigo, las risas no faltan", "Tienes un lindo corazon", "Luz de mis días 🌞",
+  "Gracias por estar aquí", "Yo soy tu amigo fiel jaja", "Tu sonrisa brilla 🌼",
+  "Compañera de vida", "Mi persona favorita 🌻", "Nunca dejes de brillar ✨"
 ];
 
 const labelsHTML = [];
 
-// Distribución tridimensional alrededor de la galaxia
 messages.forEach((text, idx) => {
   const angle = (idx / messages.length) * Math.PI * 2;
-  // Distancias y alturas variadas para repartir las frases en 360°
-  const dist = 3.0 + Math.random() * 4.5;
+  const dist = 3.2 + Math.random() * 3.2;
   const x = Math.cos(angle) * dist;
   const z = Math.sin(angle) * dist;
-  const y = (Math.random() - 0.3) * 3.5;
+  const y = (Math.random() - 0.2) * 2.8;
 
   const div = document.createElement('div');
   div.className = 'label-3d';
@@ -123,7 +130,6 @@ messages.forEach((text, idx) => {
   });
 });
 
-// Proyección dinámica de 3D a 2D según la cámara
 function updateLabels() {
   const tempV = new THREE.Vector3();
   labelsHTML.forEach(item => {
@@ -136,20 +142,19 @@ function updateLabels() {
     item.element.style.left = `${x}px`;
     item.element.style.top = `${y}px`;
 
-    // Ocultar si la etiqueta queda detrás del plano de la cámara
-    if (tempV.z > 1) {
-      item.element.style.display = 'none';
+    // Ocultar frases si sobrepasan los bordes en pantallas estrechas
+    if (tempV.z > 1 || x < -20 || x > window.innerWidth + 20 || y < -20 || y > window.innerHeight + 20) {
+      item.element.style.opacity = '0';
     } else {
-      item.element.style.display = 'block';
+      item.element.style.opacity = '1';
     }
   });
 }
 
-// --- BUCLE DE ANIMACIÓN Y ROTACIÓN ---
+// --- BUCLE DE ANIMACIÓN ---
 function animate() {
   requestAnimationFrame(animate);
 
-  // Rotación constante de la galaxia y del corazón
   galaxy.rotation.y += 0.0018;
   heartGroup.rotation.y += 0.006;
 
@@ -160,20 +165,23 @@ function animate() {
 }
 animate();
 
-// --- CONTROL DEL MODAL Y CARTA ---
+// Modal / Cierre
 const modal = document.getElementById('cardModal');
 const closeBtn = document.getElementById('closeBtn');
 
-closeBtn.addEventListener('click', () => {
-  modal.style.opacity = '0';
-  setTimeout(() => {
-    modal.style.display = 'none';
-  }, 500);
-});
+if (closeBtn) {
+  closeBtn.addEventListener('click', () => {
+    modal.style.opacity = '0';
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 500);
+  });
+}
 
-// Ajuste automático ante cambios de tamaño de pantalla
+// Redimensionamiento responsive continuo
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  adjustCameraForDevice();
 });
