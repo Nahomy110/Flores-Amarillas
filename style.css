@@ -108,6 +108,33 @@ html, body {
   margin-top: 10px;
 }
 
+/* Estilo para el botón dentro del modal */
+.btn-para-ti {
+  background-color: #ffffff;
+  color: #3a2b00;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.95rem;
+  font-family: 'Poppins', 'Segoe UI', sans-serif;
+  cursor: pointer;
+  margin-top: 15px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  display: inline-block;
+  outline: none;
+}
+
+.btn-para-ti:hover {
+  transform: scale(1.05);
+  background-color: #fff9d6;
+}
+
+.btn-para-ti:active {
+  transform: scale(0.98);
+}
+
 /* Estilos específicos para telefonos */
 @media (max-width: 600px) {
   .label-3d {
