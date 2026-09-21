@@ -1,0 +1,158 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: radial-gradient(circle, #1a1a2e 0%, #0f0c20 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  color: #fff;
+}
+
+/* Efecto de resplandor ambiental */
+.night {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at center, rgba(255, 215, 0, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Contenedor de la Flor */
+.flower-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.4s ease;
+}
+
+.flower-container:hover {
+  transform: scale(1.08);
+}
+
+.flower {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  z-index: 2;
+}
+
+/* Centro de la Flor */
+.center {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, #8b4513, #5c2c0e);
+  border-radius: 50%;
+  top: 35px;
+  left: 35px;
+  z-index: 10;
+  box-shadow: 0 0 15px rgba(139, 69, 19, 0.8);
+}
+
+/* Pétalos */
+.petal {
+  position: absolute;
+  width: 35px;
+  height: 80px;
+  background: linear-gradient(to top, #ffe600, #ffb700);
+  border-radius: 50% 50% 50% 50% / 80% 80% 20% 20%;
+  top: 20px;
+  left: 42px;
+  transform-origin: bottom center;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.6);
+  transition: filter 0.3s ease;
+}
+
+/* Rotación individual de cada pétalo */
+.p1 { transform: rotate(0deg) translateY(-25px); }
+.p2 { transform: rotate(45deg) translateY(-25px); }
+.p3 { transform: rotate(90deg) translateY(-25px); }
+.p4 { transform: rotate(135deg) translateY(-25px); }
+.p5 { transform: rotate(180deg) translateY(-25px); }
+.p6 { transform: rotate(225deg) translateY(-25px); }
+.p7 { transform: rotate(270deg) translateY(-25px); }
+.p8 { transform: rotate(315deg) translateY(-25px); }
+
+/* Tallo */
+.stem {
+  width: 10px;
+  height: 180px;
+  background: linear-gradient(to right, #2e7d32, #4caf50);
+  border-radius: 5px;
+  margin-top: -10px;
+  z-index: 1;
+}
+
+/* Hojas */
+.leaf {
+  position: absolute;
+  width: 45px;
+  height: 25px;
+  background: #388e3c;
+  border-radius: 100px 0 100px 0;
+  z-index: 1;
+}
+
+.leaf-left {
+  top: 170px;
+  left: -25px;
+  transform: rotate(-20deg);
+}
+
+.leaf-right {
+  top: 190px;
+  right: -25px;
+  transform: scaleX(-1) rotate(-20deg);
+}
+
+/* Tarjeta de Mensaje */
+.card {
+  margin-top: 30px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 20px 30px;
+  border-radius: 15px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.card h1 {
+  font-size: 1.5rem;
+  color: #ffd700;
+  margin-bottom: 8px;
+}
+
+/* Partículas flotantes */
+.particle {
+  position: absolute;
+  background: #ffd700;
+  border-radius: 50%;
+  opacity: 0.8;
+  pointer-events: none;
+  animation: floatUp 4s linear infinite;
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(100vh) scale(0);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-10vh) scale(1);
+    opacity: 0;
+  }
+}
