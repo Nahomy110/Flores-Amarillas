@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flores Amarillas para Ti 🌻</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #05020a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* Tarjeta emergente (Modal) */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            background: linear-gradient(135deg, #fff3b0 0%, #ffe066 100%);
+            color: #333;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.6), 0 10px 25px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 3px solid #ffd700;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal h2 {
+            color: #d48806;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-family: 'Georgia', serif;
+        }
+
+        .modal p {
+            font-size: 1.05rem;
+            line-height: 1.6;
+            color: #4a3b00;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal button {
+            background: #d48806;
+            color: white;
+            border: none;
+            padding: 0.7rem 1.8rem;
+            font-size: 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: background 0.3s ease;
+        }
+
+        .modal button:hover {
+            background: #b57200;
+        }
+
+        /* Instrucción en pantalla */
+        .hint {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 235, 150, 0.8);
+            font-size: 0.95rem;
+            z-index: 2;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="canvas"></canvas>
+
+    <div class="hint">Haz clic en las flores o frases para ver un mensaje ✨</div>
+
+    <div class="modal" id="cardModal">
+        <h2 id="modalTitle">🌻 Mi Amor</h2>
+        <p id="modalText">Estas flores amarillas son como tu luz: brillantes, radiantes y llenas de alegría. Gracias por iluminar cada uno de mis días.</p>
+        <button onclick="closeModal()">Cerrar 💛</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width, height;
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // Datos de los elementos en la galaxia
+        const itemsData = [
+            { title: "Eres mi sol ☀️", text: "Tu presencia ilumina todo a tu alrededor y le da un brillo especial a cada momento." },
+            { title: "Mi Amor 💛", text: "Estas flores amarillas son un detalle para recordarte lo mucho que vales y lo lindo que es coincidir contigo." },
+            { title: "Eres preciosa 🌻", text: "Tu sonrisa y tu energía tienen un encanto único que hace la vida más alegre." },
+            { title: "Siempre juntos ✨", text: "Gracias por compartir tu tiempo, tu luz y tu camino conmigo." },
+            { title: "Me encantas 🌼", text: "Cada detalle tuyo inspira alegría y momentos inolvidables." },
+            { title: "Amor de mi vida 💛", text: "Un pequeño recordatorio lleno de cariño y Flores Amarillas para ti." }
+        ];
+
+        // Partículas del fondo (polvo galáctico)
+        const particles = [];
+        const numParticles = 250;
+
+        for (let i = 0; i < numParticles; i++) {
+            particles.push({
+                x: (Math.random() - 0.5) * 1500,
+                y: (Math.random() - 0.5) * 1500,
+                z: Math.random() * 1000,
+                size: Math.random() * 2 + 1,
+                color: `rgba(${220 + Math.random()*35}, ${180 + Math.random()*60}, ${50 + Math.random()*100}, ${0.4 + Math.random()*0.5})`
+            });
+        }
+
+        // Elementos interactivos en órbita
+        const items = [];
+        const numItems = itemsData.length;
+        const radiusX = 280;
+        const radiusY = 120;
+
+        for (let i = 0; i < numItems; i++) {
+            const angle = (i / numItems) * Math.PI * 2;
+            items.push({
+                angle: angle,
+                speed: 0.005,
+                title: itemsData[i].title,
+                text: itemsData[i].text,
+                scale: 1
+            });
+        }
+
+        let globalAngle = 0;
+
+        // Dibujar Corazón central
+        function drawHeart(cx, cy, scale) {
+            ctx.save();
+            ctx.translate(cx, cy);
+            ctx.scale(scale, scale);
+            ctx.beginPath();
+            
+            for (let t = 0; t <= Math.PI * 2; t += 0.02) {
+                let x = 16 * Math.pow(Math.sin(t), 3);
+                let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                if (t === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+
+            ctx.strokeStyle = '#ffe066';
+            ctx.lineWidth = 3;
+            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#ffd700';
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.2)';
+            ctx.fill();
+            ctx.restore();
+        }
+
+        // Bucle de renderizado
+        function render() {
+            ctx.clearRect(0, 0, width, height);
+            const cx = width / 2;
+            const cy = height / 2;
+
+            globalAngle += 0.003;
+
+            // 1. Dibujar galaxia de fondo
+            let gradient = ctx.createRadialGradient(cx, cy, 10, cx, cy, 400);
+            gradient.addColorStop(0, 'rgba(255, 215, 0, 0.15)');
+            gradient.addColorStop(0.5, 'rgba(100, 60, 0, 0.05)');
+            gradient.addColorStop(1, 'rgba(5, 2, 10, 0)');
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 400, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. Dibujar partículas de fondo
+            particles.forEach(p => {
+                p.z -= 0.5;
+                if (p.z <= 0) p.z = 1000;
+
+                let k = 300 / p.z;
+                let px = p.x * k + cx;
+                let py = p.y * k + cy;
+
+                if (px >= 0 && px <= width && py >= 0 && py <= height) {
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(px, py, p.size * k * 0.5, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            });
+
+            // 3. Dibujar Corazón Central
+            const heartPulse = 1.8 + Math.sin(Date.now() * 0.003) * 0.15;
+            drawHeart(cx, cy, heartPulse);
+
+            // 4. Dibujar Elementos Orbitando (Flores y Frases)
+            items.forEach((item, index) => {
+                let currentAngle = item.angle + globalAngle;
+                let x = cx + Math.cos(currentAngle) * radiusX;
+                let y = cy + Math.sin(currentAngle) * radiusY;
+
+                let depth = (Math.sin(currentAngle) + 1) / 2; // 0 a 1
+                let scale = 0.7 + depth * 0.5;
+                let opacity = 0.5 + depth * 0.5;
+
+                item.currentX = x;
+                item.currentY = y;
+                item.currentRadius = 35 * scale;
+
+                // Dibujar sombra / resplandor
+                ctx.save();
+                ctx.globalAlpha = opacity;
+
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = '#ffd700';
+
+                // Fondo de la etiqueta
+                ctx.fillStyle = 'rgba(20, 15, 5, 0.7)';
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 1.5;
+
+                ctx.beginPath();
+                ctx.roundRect(x - 50 * scale, y - 18 * scale, 100 * scale, 36 * scale, 18 * scale);
+                ctx.fill();
+                ctx.stroke();
+
+                // Flor emoji
+                ctx.font = `${18 * scale}px Arial`;
+                ctx.textAlign = 'left';
+                ctx.fillText('🌻', x - 42 * scale, y + 6 * scale);
+
+                // Texto
+                ctx.fillStyle = '#fff3b0';
+                ctx.font = `bold ${11 * scale}px sans-serif`;
+                ctx.textAlign = 'left';
+                ctx.fillText(item.title, x - 18 * scale, y + 4 * scale);
+
+                ctx.restore();
+            });
+
+            requestAnimationFrame(render);
+        }
+
+        render();
+
+        // Interacción al hacer Clic
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const clickY = e.clientY - rect.top;
+
+            items.forEach(item => {
+                let dist = Math.hypot(clickX - item.currentX, clickY - item.currentY);
+                if (dist < item.currentRadius) {
+                    openModal(item.title, item.text);
+                }
+            });
+        });
+
+        // Funciones del Modal
+        function openModal(title, text) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalText').innerText = text;
+            document.getElementById('cardModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('cardModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>
