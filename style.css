@@ -4,18 +4,19 @@
   box-sizing: border-box;
 }
 
-body, html {
+html, body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  position: fixed; /* Evita que el navegador del móvil estire la pantalla al hacer scroll */
   background-color: #000000;
   font-family: 'Poppins', 'Segoe UI', sans-serif;
-  touch-action: none; /* Evita scroll molesto en celular */
+  touch-action: none;
 }
 
 #canvas-container {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   position: absolute;
   top: 0;
   left: 0;
@@ -27,12 +28,11 @@ body, html {
   position: absolute;
   z-index: 10;
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: bold;
   text-shadow: 
-    0 0 8px rgba(255, 230, 0, 1), 
-    0 0 15px rgba(255, 215, 0, 0.9),
-    0 0 25px rgba(255, 180, 0, 0.8);
+    0 0 6px rgba(255, 230, 0, 1), 
+    0 0 12px rgba(255, 215, 0, 0.9);
   pointer-events: none;
   transform: translate(-50%, -50%);
   white-space: nowrap;
@@ -53,16 +53,16 @@ body, html {
   backdrop-filter: blur(8px);
   justify-content: center;
   align-items: center;
-  padding: 15px;
+  padding: 20px;
 }
 
 .modal-content {
   background: linear-gradient(180deg, #fff2a1 0%, #ffd000 100%);
   color: #3a2b00;
-  padding: 25px 20px;
+  padding: 25px 18px;
   border-radius: 20px;
   width: 100%;
-  max-width: 360px;
+  max-width: 340px;
   text-align: center;
   position: relative;
   box-shadow: 0 0 35px rgba(255, 215, 0, 0.8);
@@ -86,14 +86,13 @@ body, html {
 }
 
 .modal-content h2 {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   color: #4a3800;
-  margin-bottom: 12px;
-  font-family: 'Georgia', serif;
+  margin-bottom: 10px;
 }
 
 .modal-content p {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   line-height: 1.4;
   margin-bottom: 10px;
   color: #3d2f00;
@@ -101,43 +100,14 @@ body, html {
 
 .signature {
   font-weight: bold;
-  font-size: 1.1rem !important;
+  font-size: 1rem !important;
   color: #2b2100;
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
-.btn-para-ti {
-  background-color: #ffffff;
-  color: #3a2b00;
-  border: none;
-  padding: 10px 22px;
-  border-radius: 20px;
-  font-weight: bold;
-  font-size: 0.95rem;
-  cursor: pointer;
-  margin-top: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* --- ADAPTACIÓN EXCLUSIVA PARA TELÉFONOS MÓVILES --- */
+/* Estilos específicos para telefonos */
 @media (max-width: 600px) {
   .label-3d {
-    font-size: 0.75rem; /* Tamaño de letra adaptado a celulares */
-    text-shadow: 
-      0 0 5px rgba(255, 230, 0, 1), 
-      0 0 10px rgba(255, 215, 0, 0.9);
-  }
-
-  .modal-content {
-    padding: 20px 15px;
-    max-width: 90%;
-  }
-
-  .modal-content h2 {
-    font-size: 1.5rem;
-  }
-
-  .modal-content p {
-    font-size: 0.88rem;
+    font-size: 0.75rem;
   }
 }
