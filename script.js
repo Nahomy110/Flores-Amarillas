@@ -1,7 +1,7 @@
+// Configuración básica de Three.js
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 
-// Campo de visión más amplio (75°) para que encaje bien en celulares
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -11,29 +11,87 @@ container.appendChild(renderer.domElement);
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.maxDistance = 25;
+controls.maxDistance = 30;
 controls.minDistance = 3;
 
-// Ajusta la perspectiva según la orientación de la pantalla (Vertical/Celular vs Horizontal/PC)
 function updateCameraPerspective() {
   const isPortrait = window.innerHeight > window.innerWidth;
-  
   if (isPortrait) {
-    // En celular colocamos la cámara más alta y con un ángulo inclinado hacia abajo
-    camera.fov = 85; 
-    camera.position.set(0, 9, 13);
+    camera.fov = 85;
+    camera.position.set(0, 9, 14);
   } else {
-    // En computadora
     camera.fov = 60;
     camera.position.set(0, 5, 11);
   }
-  
   controls.target.set(0, 1, 0);
   camera.updateProjectionMatrix();
   controls.update();
 }
-
 updateCameraPerspective();
+
+// --- FUNCIÓN PARA GENERAR TEXTURA DE FLORES Y BRILLOS EN TIEMPO REAL ---
+function createSunflowerTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+
+  // Pétalos amarillos
+  ctx.translate(64, 64);
+  ctx.fillStyle = '#ffcc00';
+  for (let i = 0; i < 12; i++) {
+    ctx.beginPath();
+    ctx.ellipse(0, 35, 8, 22, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.rotate((Math.PI * 2) / 12);
+  }
+
+  // Centro de la flor (marrón con brillo)
+  ctx.beginPath();
+  ctx.arc(0, 0, 18, 0, Math.PI * 2);
+  ctx.fillStyle = '#5a3d00';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(0, 0, 12, 0, Math.PI * 2);
+  ctx.fillStyle = '#3a2500';
+  ctx.fill();
+
+  const texture = new THREE.CanvasTexture(canvas);
+  return texture;
+}
+
+function createGlowTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+
+  const gradient = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gradient.addColorStop(0, 'rgba(255, 255, 200, 1)');
+  gradient.addColorStop(0.3, 'rgba(255, 215, 0, 0.8)');
+  gradient.addColorStop(0.7, 'rgba(255, 180, 0, 0.2)');
+  gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 128, 128);
+
+  return new THREE.CanvasTexture(canvas);
+}
+
+// --- RESPLANDOR Y NÚCLEO LUMINOSO EN EL CENTRO ---
+const glowTexture = createGlowTexture();
+const glowMaterial = new THREE.SpriteMaterial({
+  map: glowTexture,
+  color: 0xffea00,
+  transparent: true,
+  blending: THREE.AdditiveBlending,
+  opacity: 0.85
+});
+const centralGlow = new THREE.Sprite(glowMaterial);
+centralGlow.scale.set(7, 7, 1);
+centralGlow.position.set(0, 1.8, 0);
+scene.add(centralGlow);
 
 // --- GALAXIA DE PARTÍCULAS DORADAS ---
 const particleCount = 8500;
@@ -42,7 +100,7 @@ const positions = new Float32Array(particleCount * 3);
 const colors = new Float32Array(particleCount * 3);
 
 for (let i = 0; i < particleCount; i++) {
-  const radius = Math.random() * 7.5 + 0.5;
+  const radius = Math.random() * 8.0 + 0.5;
   const spinAngle = radius * 3.5;
   const branchAngle = ((i % 4) * 2 * Math.PI) / 4;
 
@@ -76,7 +134,7 @@ const particleMaterial = new THREE.PointsMaterial({
 const galaxy = new THREE.Points(geometry, particleMaterial);
 scene.add(galaxy);
 
-// --- CORAZÓN EN EL CENTRO ---
+// --- CORAZÓN BRILLANTE EN EL CENTRO ---
 const heartGroup = new THREE.Group();
 const heartParticleCount = 1200;
 const heartGeo = new THREE.BufferGeometry();
@@ -97,8 +155,8 @@ for (let i = 0; i < heartParticleCount; i++) {
 
 heartGeo.setAttribute('position', new THREE.BufferAttribute(heartPos, 3));
 const heartMat = new THREE.PointsMaterial({
-  color: 0xffea00,
-  size: 0.055,
+  color: 0xffffaa,
+  size: 0.06,
   transparent: true,
   opacity: 0.95
 });
@@ -107,6 +165,33 @@ const heartParticles = new THREE.Points(heartGeo, heartMat);
 heartGroup.add(heartParticles);
 heartGroup.position.set(0, 2.0, 0);
 scene.add(heartGroup);
+
+// --- FLORES AMARILLAS FLOTANTES (3D SPRITES) ---
+const flowerTexture = createSunflowerTexture();
+const flowerMaterial = new THREE.SpriteMaterial({
+  map: flowerTexture,
+  transparent: true,
+  opacity: 0.95
+});
+
+const flowersGroup = new THREE.Group();
+const flowerCount = 16;
+
+for (let i = 0; i < flowerCount; i++) {
+  const sprite = new THREE.Sprite(flowerMaterial);
+  const angle = (i / flowerCount) * Math.PI * 2;
+  const dist = 2.5 + Math.random() * 3.5;
+
+  sprite.position.x = Math.cos(angle) * dist;
+  sprite.position.z = Math.sin(angle) * dist;
+  sprite.position.y = (Math.random() - 0.2) * 2.5;
+
+  const scale = 0.5 + Math.random() * 0.4;
+  sprite.scale.set(scale, scale, 1);
+
+  flowersGroup.add(sprite);
+}
+scene.add(flowersGroup);
 
 // --- FRASES FLOTANTES 3D ---
 const messages = [
@@ -122,7 +207,7 @@ const labelsHTML = [];
 
 messages.forEach((text, idx) => {
   const angle = (idx / messages.length) * Math.PI * 2;
-  const dist = 2.8 + Math.random() * 2.8;
+  const dist = 3.0 + Math.random() * 3.0;
   const x = Math.cos(angle) * dist;
   const z = Math.sin(angle) * dist;
   const y = (Math.random() - 0.2) * 2.2;
@@ -150,7 +235,6 @@ function updateLabels() {
     item.element.style.left = `${x}px`;
     item.element.style.top = `${y}px`;
 
-    // Visibilidad controlada dentro de los límites de la pantalla
     if (tempV.z > 1 || x < 10 || x > window.innerWidth - 10 || y < 10 || y > window.innerHeight - 10) {
       item.element.style.opacity = '0';
     } else {
@@ -159,12 +243,21 @@ function updateLabels() {
   });
 }
 
-// --- ANIMACIÓN Y RENDERING ---
+// --- ANIMACIÓN CONTINUA Y RENDERIZADO ---
+let clock = new THREE.Clock();
+
 function animate() {
   requestAnimationFrame(animate);
 
+  const elapsedTime = clock.getElapsedTime();
+
   galaxy.rotation.y += 0.0018;
   heartGroup.rotation.y += 0.006;
+  flowersGroup.rotation.y += 0.003;
+
+  // Efecto latido / pulso en el resplandor central
+  const pulse = 1 + Math.sin(elapsedTime * 2.5) * 0.08;
+  centralGlow.scale.set(7 * pulse, 7 * pulse, 1);
 
   controls.update();
   updateLabels();
@@ -173,7 +266,7 @@ function animate() {
 }
 animate();
 
-// Control del Modal
+// Control de Modal
 const modal = document.getElementById('cardModal');
 const closeBtn = document.getElementById('closeBtn');
 
@@ -186,9 +279,9 @@ if (closeBtn) {
   });
 }
 
-// Evento al redimensionar o rotar pantalla
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   renderer.setSize(window.innerWidth, window.innerHeight);
   updateCameraPerspective();
 });
+
